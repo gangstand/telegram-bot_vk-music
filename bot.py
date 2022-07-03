@@ -9,7 +9,7 @@ import vk_api
 import os
 import re
 
-bot = Bot(token="5554601137:AAFRyVxyEusP4YmolVV2Tp6Kd1P29J8MW7c")
+bot = Bot(token="")
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
