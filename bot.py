@@ -26,7 +26,7 @@ async def start(message: types.Message):
                     await message.answer('Список музыки загружен :D\n(Чтобы обновить список, нужно перезайти в сервис)',
                                          reply_markup=markup_music)
             except:
-                await message.answer('Список треков не загружен, ожидайте он загружается...')
+                await message.answer('Список музыки не загружен, ожидайте он загружается...')
     except:
         await message.answer('Вы не авторизованы', reply_markup=markup_auth)
 
@@ -95,6 +95,7 @@ async def password(message: types.Message, state: FSMContext):
                     '\nВремя загрузки зависит от размера вашего плейлиста')
             for track in vkaudio.get_iter():
                 with open("music_list.txt", "a", encoding="utf8") as f:
+                    print(track, file=f)
                     f.close()
             await message.answer('Список музыки загружен :D\n'
                                  '(Чтобы обновить список, нужно перезайти в сервис)',
