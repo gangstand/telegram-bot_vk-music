@@ -93,8 +93,6 @@ async def password(message: types.Message, state: FSMContext):
         except:
             password = data['password']
 
-        print(password, key)
-
         def auth_handler():
             remember_device = True
             return key, remember_device
@@ -114,14 +112,13 @@ async def password(message: types.Message, state: FSMContext):
             await message.answer("Вы успешно вошли")
             try:
                 with open('music_list.txt'):
-                    await message.answer('Список музыки загружены (Чтобы обновить список, нужно перезайти в сервис!)',
+                    await message.answer('Список музыки загружен (Чтобы обновить список, нужно перезайти в сервис!)',
                                          reply_markup=markup_music)
             except:
                 await message.answer(
-                    'Список музыки не загружены, ожидайте он загружается...\nВремя загрузки зависит от размера вашего плейлиста')
+                    'Список музыки не загружен, ожидайте он загружается...\nВремя загрузки зависит от размера вашего плейлиста')
             for track in vkaudio.get_iter():
                 with open("music_list.txt", "a", encoding="utf8") as f:
-                    print(track, file=f)
                     f.close()
             await message.answer('Список музыки загружен :D\n(Чтобы обновить список, нужно перезайти в сервис)',
                                  reply_markup=markup_music)
@@ -129,17 +126,17 @@ async def password(message: types.Message, state: FSMContext):
             await message.answer(error_msg)
 
 
-class Filter(StatesGroup):
+class Filter_id(StatesGroup):
     id = State()
 
 
 @dp.callback_query_handler(lambda c: c.data == 'Music_id')
 async def Save_new_massage(callback_query: types.CallbackQuery):
-    await Filter.id.set()
+    await Filter_id.id.set()
     await bot.send_message(callback_query.from_user.id, 'Введите id песни:')
 
 
-@dp.message_handler(state=Filter.id)
+@dp.message_handler(state=Filter_id.id)
 async def music(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['id'] = message.text
@@ -150,17 +147,68 @@ async def music(message: types.Message, state: FSMContext):
     for line in f:
         if x == id_music:
             title = (line.split()[10:-2])
-            print(title)
             music_url = line.split()[8].replace("'", '').replace(",", '')
-            print(music_url)
-            title = re.sub("[|(|)|'|,|]", "", str(title)).replace('title', '').replace('"', '').replace('[','').replace(']','')
-            title_ = title.replace(" ", "_").replace(".", "_").replace(":", "_")
+            title = re.sub("[|(|)|'|,|]", "", str(title)).replace('title', '').replace('"', '').replace(
+                '[', '').replace(']', '')
+            title_ = title.replace(" ", "_").replace(".", "_").replace(":", "_").replace(
+                "?", "_")
             await bot.send_message(message.from_user.id, f'Песня - {title}')
-            await bot.send_message(message.from_user.id, 'Компилирую и отправляю...')
-            os.system(f'ffmpeg -y -i {music_url} -vn -ar 44100 -ac 2 -ab 192 -f mp3 -c copy music\\{title_}.mp3')
-            music_out = open(f"music/{title_}.mp3", "rb")
-            await bot.send_document(message.from_user.id, music_out)
+            try:
+                music_out = open(f"music\\{title_}.mp3", "rb")
+                await bot.send_document(message.from_user.id, music_out)
+            except:
+                os.system(f'streamlink --output music\\{title_}.ts {music_url} best')
+                os.system(f'ffmpeg -y -i music\\{title_}.ts music\\{title_}.mp3')
+                music_out = open(f"music\\{title_}.mp3", "rb")
+                await bot.send_document(message.from_user.id, music_out)
         x += 1
+    await bot.send_message(message.from_user.id, 'Отправка завершена...')
+
+
+class Filter_search(StatesGroup):
+    search = State()
+
+
+@dp.callback_query_handler(lambda c: c.data == 'Music_search')
+async def Save_new_massage(callback_query: types.CallbackQuery):
+    await Filter_search.search.set()
+    await bot.send_message(callback_query.from_user.id,
+                           'Введите название песни или исполнителя:\n(Не выдаёт результат? Введите в правильном регистре)')
+
+
+@dp.message_handler(state=Filter_search.search)
+async def music(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['id'] = message.text
+        search_string = data['id']
+        with open("music_list.txt", "r", encoding='utf8') as f:
+            n = 0
+            for line in f:
+                n += 1
+                if search_string in line:
+                    f = open("music_list.txt", "r", encoding='utf8')
+                    x = 1
+                    id_music = n
+                    await state.finish()
+                    for line in f:
+                        if x == id_music:
+                            title = (line.split()[10:-2])
+                            music_url = line.split()[8].replace("'", '').replace(",", '')
+                            title = re.sub("[|(|)|'|,|]", "", str(title)).replace('title', '').replace('"', '').replace(
+                                '[', '').replace(']', '')
+                            title_ = title.replace(" ", "_").replace(".", "_").replace(":", "_").replace(
+                                "?", "_")
+                            await bot.send_message(message.from_user.id, f'Песня - {title}')
+                            try:
+                                music_out = open(f"music\\{title_}.mp3", "rb")
+                                await bot.send_document(message.from_user.id, music_out)
+                            except:
+                                os.system(f'streamlink --output music\\{title_}.ts {music_url} best')
+                                os.system(f'ffmpeg -y -i music\\{title_}.ts music\\{title_}.mp3')
+                                music_out = open(f"music\\{title_}.mp3", "rb")
+                                await bot.send_document(message.from_user.id, music_out)
+                        x += 1
+    await bot.send_message(message.from_user.id, 'Отправка завершена...')
 
 
 if __name__ == "__main__":
