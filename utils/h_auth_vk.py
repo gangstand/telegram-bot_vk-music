@@ -41,9 +41,9 @@ async def password(message: types.Message, state: FSMContext):
         if not path.exists(username):
             mkdir(username)
 
-        if data['password']:
+        try:
             password_vk, key_handler = data['password'].split()
-        else:
+        except ValueError:
             password_vk = data['password']
 
     def auth_handler():
