@@ -78,11 +78,13 @@ async def password(message: types.Message, state: FSMContext):
         if path.exists(f'{username}/music_list.txt'):
             await message.answer(HCOM_AUT_MUSIC, reply_markup=markup_music)
         else:
-            return await message.answer(HCOM_AUT_NOMUSIC)
+             await message.answer(HCOM_AUT_NOMUSIC)
 
         for track in vkaudio.get_iter():
             with open(f"{username}/music_list.txt", "a", encoding="utf8") as f:
+                print(f"{track.get('url')}___{track.get('artist')} : {track.get('title')}")
                 print(f"{track.get('url')}___{track.get('artist')} : {track.get('title')}", file=f)
+            f.close()
 
         await message.answer(HCOM_AUT_NOMUSIC, reply_markup=markup_music)
 

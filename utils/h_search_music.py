@@ -40,17 +40,19 @@ async def music_search_save(message: types.Message, state: FSMContext):
                         if x == id_music:
 
                             url, title = line.split("___")
-                            _title = title.replace(":", "_").replace("?", "_").replace(" ", "_")
+                            _title = re.sub("[$|@|&|?|!|,|.|\n|:| ]", '', title).replace("-", "_")
 
                             await bot.send_message(message.from_user.id, f'Песня - {title}')
-                            try:
-                                music_out = open(f"music\\{_title}.mp3", "rb")
+
+                            if os.path.exists(f"music/{_title}.mp3"):
+                                music_out = open(f"music/{_title}.mp3", "rb")
                                 await bot.send_document(message.from_user.id, music_out)
                                 music_out.close()
-                            except:
-                                os.system(f'streamlink --output music\\{_title}.ts {url} best')
-                                os.system(f'ffmpeg -y -i music\\{_title}.ts music\\{_title}.mp3')
-                                music_out = open(f"music\\{_title}.mp3", "rb")
+                            else:
+                                os.system(f'streamlink --output music/{_title}.ts {url} best')
+                                os.system(f'ffmpeg -y -i music/{_title}.ts music/{_title}.mp3')
+                                music_out = open(f"music/{_title}.mp3", "rb")
+                                os.remove(f'music/{_title}.ts')
                                 await bot.send_document(message.from_user.id, music_out)
                                 music_out.close()
                         x += 1

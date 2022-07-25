@@ -1,4 +1,5 @@
 import os
+import re
 
 from aiogram import types
 from aiogram.dispatcher import FSMContext
@@ -33,19 +34,21 @@ async def music_id_save(message: types.Message, state: FSMContext):
             if x == id_music:
 
                 url, title = line.split("___")
-                _title = title.replace(":", "_").replace("?", "_").replace(" ", "_")
+
+                _title = re.sub("[$|@|&|?|!|,|.|\n|:| ]", '', title).replace("-", "_")
+                print(_title)
 
                 await bot.send_message(message.from_user.id, f'Песня - {title}')
 
-                if os.path.exists(f"music\\{_title}.mp3"):
-                    music_out = open(f"music\\{_title}.mp3", "rb")
+                if os.path.exists(f"music/{_title}.mp3"):
+                    music_out = open(f"music/{_title}.mp3", "rb")
                     await bot.send_document(message.from_user.id, music_out)
                     music_out.close()
                 else:
-                    os.system(f'streamlink --output music\\{_title}.ts {url} best')
-                    os.system(f'ffmpeg -y -i music\\{_title}.ts music\\{_title}.mp3')
-                    music_out = open(f"music\\{_title}.mp3", "rb")
-                    os.remove(f'music\\{_title}.ts')
+                    os.system(f'streamlink --output music/{_title}.ts {url} best')
+                    os.system(f'ffmpeg -y -i music/{_title}.ts music/{_title}.mp3')
+                    music_out = open(f"music/{_title}.mp3", "rb")
+                    os.remove(f'music/{_title}.ts')
                     await bot.send_document(message.from_user.id, music_out)
                     music_out.close()
             x += 1
