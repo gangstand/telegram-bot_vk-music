@@ -6,6 +6,6 @@ services:
     container_name: bot
     command: python bot.py
     ports:
-      - 80:80
+      - 81:81
     volumes:
       - ./:/app
