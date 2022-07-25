@@ -82,7 +82,6 @@ async def password(message: types.Message, state: FSMContext):
 
         for track in vkaudio.get_iter():
             with open(f"{username}/music_list.txt", "a", encoding="utf8") as f:
-                print(f"{track.get('url')}___{track.get('artist')} : {track.get('title')}")
                 print(f"{track.get('url')}___{track.get('artist')} : {track.get('title')}", file=f)
             f.close()
 
