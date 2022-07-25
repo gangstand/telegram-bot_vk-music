@@ -9,7 +9,13 @@ from vk_api.audio import VkAudio
 
 from core.settings import dp, bot
 from utils.button import markup_music
-from core.variables import HAUTH_LOGIN, HAUTH_PS, HCOM_AUT_MUSIC, HCOM_AUT_NOMUSIC
+from core.variables import (
+    HAUTH_LOGIN,
+    HAUTH_PS,
+    HCOM_AUT_MUSIC,
+    HAUTH_LS,
+    HAUTH_AUTH
+)
 
 
 class FormPS(StatesGroup):
@@ -73,19 +79,19 @@ async def password(message: types.Message, state: FSMContext):
         if path.exists(f'{username}/music_list.txt'):
             remove(f"{username}/music_list.txt")
 
-        await message.answer("Вы успешно вошли")
+        await message.answer(HAUTH_AUTH)
 
         if path.exists(f'{username}/music_list.txt'):
             await message.answer(HCOM_AUT_MUSIC, reply_markup=markup_music)
         else:
-             await message.answer(HCOM_AUT_NOMUSIC)
+             await message.answer(HAUTH_LS)
 
         for track in vkaudio.get_iter():
             with open(f"{username}/music_list.txt", "a", encoding="utf8") as f:
                 print(f"{track.get('url')}___{track.get('artist')} : {track.get('title')}", file=f)
             f.close()
 
-        await message.answer(HCOM_AUT_NOMUSIC, reply_markup=markup_music)
+        await message.answer(HCOM_AUT_MUSIC, reply_markup=markup_music)
 
     except AuthError as error:
         await message.answer(error)

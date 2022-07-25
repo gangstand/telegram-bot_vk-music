@@ -23,6 +23,8 @@ HCOM_EXIT = text().get("HCOM_EXIT", None)
 
 HAUTH_LOGIN = text().get("HAUTH_LOGIN", None)
 HAUTH_PS = text().get("HAUTH_PS", None)
+HAUTH_LS = text().get("HAUTH_LS", None)
+HAUTH_AUTH = text().get("HAUTH_AUTH", None)
 
 HID_MUSIC = text().get("HID_MUSIC", None)
 HSR_MUSIC = text().get("HSR_MUSIC", None)
